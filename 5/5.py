@@ -1,6 +1,6 @@
 import re, math
 
-with open("5/test.txt", "r") as f:
+with open("5/input.txt", "r") as f:
     global data 
     data = f.read().splitlines()
 
@@ -40,37 +40,41 @@ for s,seed in enumerate(seeds):
     
 print(min(seeds))
 
+
 for step in conversions:
-    for line in step:
-        for s,seed in enumerate(seedrange):
-            print(seed,line)
-            if seed[1] < line[0]:
-                print("seed below range")
-            elif seed[0] > line[1]:
-                print("seed above range")
-            elif seed[0] >= line[0] and seed[1] <= line[1]:
+    s = 0
+    while s < len(seedrange):
+        for line in step:
+            if seedrange[s][1] < line[0]:
+                pass
+            elif seedrange[s][0] > line[1]:
+                pass
+            elif seedrange[s][0] >= line[0] and seedrange[s][1] <= line[1]:
                 seedrange[s][0] += line[2]
                 seedrange[s][1] += line[2]                
-                print("seed within range")
-            elif seed[0] < line[0] and seed[1] > line[1]:
+                break
+            elif seedrange[s][0] < line[0] and seedrange[s][1] > line[1]:
+                seedrange.append([seedrange[s][0],line[0]-1])
+                seedrange.append([line[1]+1,seedrange[s][1]])
                 seedrange[s][0] = line[0] + line[2]
                 seedrange[s][1] = line[1] + line[2]
-                seedrange.append([seed[0],line[0]-1])
-                seedrange.append([line[1]+1,seed[1]])
-                print("seed above and below range")
-            elif seed[0] < line[0] and seed[1] < line[1]:
-                seedrange[s][0] = seed[0] + line[2]
+                break
+            elif seedrange[s][0] < line[0] and seedrange[s][1] <= line[1]:
+                seedrange.append([seedrange[s][0],line[0]-1])
+                seedrange[s][0] = line[0] + line[2]
                 seedrange[s][1] += line[2]
-                seedrange.append([seed[0],line[0]-1])
-                print("lower boundary crosser")
-            elif seed[0] > line[0] and seed[1] > line[1]:
+                break
+            elif seedrange[s][0] >= line[0] and seedrange[s][1] > line[1]:
+                seedrange.append([line[1]+1,seedrange[s][1]])
                 seedrange[s][0] += line[2]
                 seedrange[s][1] = line[1] + line[2]
-                seedrange.append([line[1]+1,seed[1]])
-                print("upper boundary crosser")
+                break
+        s += 1
         
-print(seedrange)
 
+
+mymin = min([min(r) for r in seedrange])
+print(mymin)
 
 #seeds
 #seed-soil  - 1
