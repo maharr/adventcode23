@@ -1,18 +1,20 @@
-import re
+import re, math
 
-with open("5/input.txt", "r") as f:
+with open("5/test.txt", "r") as f:
     global data 
     data = f.read().splitlines()
 
-conversions = [[] for i in range(8)]
-counter = 0
+seeds = []
+conversions = [[] for i in range(7)]
+counter = -1
 
 
 for line in data:
     numbers = [int(x) for x in re.findall(r"(\d+)", line)]
     if len(numbers) > 1:
-        if counter == 0:
-            conversions[counter] = numbers
+        if counter == -1:
+            seeds = numbers
+            counter += 1
         else:
             offset = numbers[0] - numbers[1]
             conversions[counter].append([numbers[1],numbers[1]+numbers[2]-1,offset])
@@ -20,16 +22,55 @@ for line in data:
     elif len(conversions[counter]) > 0:   
         counter += 1
 
+seedrange = []
+
+for i in range(math.floor(len(seeds)/2)):
+    seedrange.append([seeds[i*2], seeds[i*2] + seeds[(i*2)+1]-1])
+
+
+
 counter = 1
-for s,seed in enumerate(conversions[0]):
-    for step in conversions[1:]:
+for s,seed in enumerate(seeds):
+    for step in conversions:
         for line in step:
             if line[0] <= seed <= line[1]:
-                seed = seed + line[2]
-                conversions[0][s] = seed
+                seed += line[2]
+                seeds[s] = seed
                 break
     
-print(min(conversions[0]))
+print(min(seeds))
+
+for step in conversions:
+    for line in step:
+        for s,seed in enumerate(seedrange):
+            print(seed,line)
+            if seed[1] < line[0]:
+                print("seed below range")
+            elif seed[0] > line[1]:
+                print("seed above range")
+            elif seed[0] >= line[0] and seed[1] <= line[1]:
+                seedrange[s][0] += line[2]
+                seedrange[s][1] += line[2]                
+                print("seed within range")
+            elif seed[0] < line[0] and seed[1] > line[1]:
+                seedrange[s][0] = line[0] + line[2]
+                seedrange[s][1] = line[1] + line[2]
+                seedrange.append([seed[0],line[0]-1])
+                seedrange.append([line[1]+1,seed[1]])
+                print("seed above and below range")
+            elif seed[0] < line[0] and seed[1] < line[1]:
+                seedrange[s][0] = seed[0] + line[2]
+                seedrange[s][1] += line[2]
+                seedrange.append([seed[0],line[0]-1])
+                print("lower boundary crosser")
+            elif seed[0] > line[0] and seed[1] > line[1]:
+                seedrange[s][0] += line[2]
+                seedrange[s][1] = line[1] + line[2]
+                seedrange.append([line[1]+1,seed[1]])
+                print("upper boundary crosser")
+        
+print(seedrange)
+
 
 #seeds
 #seed-soil  - 1
